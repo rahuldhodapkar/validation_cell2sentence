@@ -1,0 +1,8 @@
+
+# generated files
+cache
+calc
+data
+fig
+.DS_Store
+.Rhistory

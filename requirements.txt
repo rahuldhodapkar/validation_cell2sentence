@@ -1,0 +1,10 @@
+gensim
+numpy
+pandas
+pot
+scipy
+matplotlib
+plotnine
+numba
+sklearn
+umap-learn
