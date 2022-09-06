@@ -8,3 +8,4 @@ plotnine
 numba
 sklearn
 umap-learn
+igraph

@@ -29,10 +29,10 @@ s <- ifelse(!dir.exists('./calc/word2vec'), dir.create('./calc/word2vec'), FALSE
 ## Load Data
 ################################################################################
 
-species.idx <- 4
+species.idx <- 5
 
-species.long.names <- c('human', 'mouse', 'zebrafish', 'chick')
-species.short.names <- c('hu', 'mu', 'zf', 'ch')
+species.long.names <- c('human', 'mouse', 'zebrafish', 'chick', 'macaque')
+species.short.names <- c('hu', 'mu', 'zf', 'ch', 'ma')
 
 species.long <- species.long.names[[species.idx]]
 species.short <- species.short.names[[species.idx]]
