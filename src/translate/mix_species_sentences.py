@@ -121,6 +121,8 @@ def simplify_cluster_names(clusters):
     return simple_clusters
 
 
+mixed_color_scale = ['#e69f00', '#56b4e9', '#009e73', '#d55e00', '#cc79a7']
+
 ################################################################################
 ## Load Data
 ################################################################################
@@ -458,21 +460,44 @@ p = (pn.ggplot(plot_df, pn.aes(x='umap1', y='umap2', color='species')) +
 p.save('./fig/translate/all_species_umap.png', height=7, width=9)
 
 p = (pn.ggplot(plot_df, pn.aes(x='umap1', y='umap2', color='cluster', shape='species')) + 
-    pn.geom_point(size=0.5))
+    pn.geom_point(size=0.5) +
+    pn.theme_classic())
 p.save('./fig/translate/all_cluster_umap.png', height=7, width=9)
+
+clusts_to_compare = [
+    'Photoreceptors',
+    'Horizontal',
+    'Bipolar',
+    'Amacrine',
+    'RGC'
+]
+
+# get subset with only key neuronal types
+combined_dist_matrix_neuronal = combined_dist_matrix[plot_df['cluster'].isin(clusts_to_compare),:][
+                                                     :, plot_df['cluster'].isin(clusts_to_compare)]
+reducer_neuronal = umap.UMAP(metric='precomputed')                              
+combined_umap_neuronal_red = reducer_neuronal.fit_transform(combined_dist_matrix_neuronal)
+
+plot_df_neuronal = pd.DataFrame({
+    'umap1': combined_umap_neuronal_red[:,0],
+    'umap2': combined_umap_neuronal_red[:,1],
+    'cluster': plot_df.loc[plot_df['cluster'].isin(clusts_to_compare),'cluster'],
+    'species': plot_df.loc[plot_df['cluster'].isin(clusts_to_compare),'species']
+})
+
+plot_df_neuronal['cluster'] = pd.Categorical(plot_df_neuronal['cluster'],
+    categories=clusts_to_compare[::-1])
+
+p = (pn.ggplot(plot_df_neuronal, pn.aes(x='umap1', y='umap2', fill='cluster', shape='species')) + 
+    pn.geom_point(size=1.5, alpha=0.5, color='black') +
+    pn.theme_classic())
+p.save('./fig/translate/all_cluster_umap_neurons.png', height=10, width=15)
+
 
 
 ##################
 ## compare key groups across species in embedded space.
 ##################
-
-clusts_to_compare = [
-    'Photoreceptors',
-    'Bipolar',
-    'Horizontal',
-    'Amacrine',
-    'RGC'
-]
 
 tags = ['hu', 'mu', 'ch', 'ma']
 
@@ -602,7 +627,37 @@ sp.stats.ttest_1samp(
         ~np.isnan(get_diagonal_diffs(ch_hu_emd_matrix))
     ]), popmean=0)
 
+# now plot heatmaps using 1/emd
+comb_heatmap_df = pd.DataFrame({
+    'affinity': np.concatenate( (
+        np.ravel(1/ma_hu_emd_matrix),
+        np.ravel(1/mu_hu_emd_matrix),
+        np.ravel(1/ch_hu_emd_matrix)
+    ) ),
+    'distance': np.concatenate( (
+        np.ravel(ma_hu_emd_matrix),
+        np.ravel(mu_hu_emd_matrix),
+        np.ravel(ch_hu_emd_matrix)
+    ) ),
+    'from': pd.Categorical(np.concatenate(
+        [[x] * len(clusts_to_compare) for x in clusts_to_compare] * 3),
+        categories=clusts_to_compare),
+    'to': pd.Categorical(
+        clusts_to_compare * len(clusts_to_compare) * 3,
+        categories=clusts_to_compare),
+    'species': pd.Categorical(np.concatenate((
+        ['macaque'] * len(clusts_to_compare)**2,
+        ['mouse'] * len(clusts_to_compare)**2,
+        ['chick'] * len(clusts_to_compare)**2
+    )), categories=['macaque', 'mouse', 'chick'])
+})
 
+p = (pn.ggplot(comb_heatmap_df, pn.aes(y='from', x='to', fill='affinity')) +
+    pn.geom_tile() +
+    pn.facets.facet_grid('. ~ species') +
+    pn.scales.scale_fill_cmap(cmap_name='magma') +
+    pn.theme_classic())
+p.save('./fig/translate/translation_heatmaps.png', width=18, height=6)
 
 
 hu_ma_emd_matrix_nodiag - (

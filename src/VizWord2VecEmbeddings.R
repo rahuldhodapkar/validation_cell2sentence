@@ -29,7 +29,7 @@ s <- ifelse(!dir.exists('./calc/word2vec'), dir.create('./calc/word2vec'), FALSE
 ## Load Data
 ################################################################################
 
-species.idx <- 5
+species.idx <- 4
 
 species.long.names <- c('human', 'mouse', 'zebrafish', 'chick', 'macaque')
 species.short.names <- c('hu', 'mu', 'zf', 'ch', 'ma')
@@ -87,7 +87,7 @@ for (i in 1:length(emb.list)) {
   gene.metadata$cluster <- as.factor(paste("C", clust.res$membership, sep=''))
   
   ggplot(gene.metadata, aes(x=umap1, y=umap2, color=cluster)) +
-    geom_point()
+    geom_point() + theme_cowplot()
   ggsave(paste0('./fig/word2vec/', species.short, '_', emb.name, '_gene_embedding.png'), width=8, height=8)
   
   ################################################################################
@@ -207,14 +207,15 @@ for (i in 1:length(emb.list)) {
     theme_classic()
 }
 
-ggplot(stats.df, aes(x=type, y=mean.dist, color=embedding)) +
-  geom_boxplot(width=0.3, size=1, fatten=1, colour="black") +
-  geom_point(size=2, alpha=0.5) +
-  geom_line(aes(group=id), colour="grey70", linetype="11") +
-  theme_classic() + background_grid() +
+ggplot(stats.df, aes(x=type, y=mean.dist / 2)) +
+  geom_boxplot(width=0.3, size=1, fatten=1, colour="black", outlier.shape = NA) +
+  geom_point(size=2, alpha=0.5, colour='black', shape=21) +
+  geom_line(aes(group=id), colour="black", linetype="11") +
+  theme_minimal_hgrid() +
+  ylim(c(0,1)) +
   facet_grid(.~embedding) +
   scale_color_manual(values=brewer.pal(n=3, name='Set2'))
-ggsave(paste0('./fig/word2vec/', species.short, '_hallmark_boxplot.png'), width=8, height=8)
+ggsave(paste0('./fig/word2vec/', species.short, '_hallmark_boxplot.png'), width=12, height=8)
 
 # get stats
 for (i in 1:length(emb.list)) {
