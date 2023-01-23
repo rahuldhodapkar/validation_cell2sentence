@@ -1,17 +1,32 @@
-# Validation of cell2sentence
+# Experiments for cell2sentence
 
-As part of the validation for cell2sentence, we would like to replicate
-the cell line experiment by Korunsky et al in the Harmony paper, and
-show that rank ordering alone is sufficient to provide batch normalization
+This repository contains code to reproduce the findings of the `cell2sentence`
+manuscript.  Preprint available
+[here](https://www.biorxiv.org/content/10.1101/2022.09.18.508438).
+
+## Environment Setup
+This repository has been tested within an isolated conda environment
+using `python` version `3.9.x` and `R` version 
+`4.1.2 (2021-11-01) -- "Bird Hippie"` on macOS Monterey version `12.2`.
+
+To configure your environment, install `R`, and set up a conda environment with
+
+    conda create -n c2s python=3.9
+
+Then activate with
+
+    conda activate c2s
+
+And finalize environment setup with:
+
+    make setup
+
+which will install all required dependencies for downstream analysis
+
+## Reproducing Experiments
+
+### PBMC Edit Distance Experiment
 
 
-## Data
-Data download links provided courtesy of 10x genomics:
 
-jurkat  https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/jurkat
-hek293t https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/293t
-half    https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/jurkat:293t_50:50
-
-the `Gene / cell matrix (filtered)` was downloaded for each of these datasets
-and unpacked to the `data` directory for evaluation by cell2sentence.
 

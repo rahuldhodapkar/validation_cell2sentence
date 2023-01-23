@@ -6,3 +6,6 @@ data
 fig
 .DS_Store
 .Rhistory
+
+# censor old code
+*_old

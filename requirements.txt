@@ -9,3 +9,5 @@ numba
 sklearn
 umap-learn
 igraph
+cell2sentence
+tqdm
