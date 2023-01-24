@@ -29,6 +29,11 @@ install.packages('word2vec')
 install.packages('cccd')
 install.packages('igraph')
 install.packages('ade4')
+install.packages('reticulate')
+install.packages('igraph')
+install.packages('cccd')
+install.packages('pdfCluster')
+install.packages('stringr')
 
 ##############################################
 # INSTALL FROM BIOCONDUCTOR
@@ -38,6 +43,7 @@ if(!requireNamespace("BiocManager", quietly = TRUE)) {
  install.packages("BiocManager") 
 }
 
+BiocManager::install("splatter")
 
 ##############################################
 # INSTALL FROM GITHUB
