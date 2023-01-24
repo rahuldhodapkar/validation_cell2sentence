@@ -6,6 +6,7 @@ data
 fig
 .DS_Store
 .Rhistory
+Rplots.pdf
 
 # censor old code
 *_old

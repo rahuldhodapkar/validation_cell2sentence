@@ -11,7 +11,7 @@ library(stringr)
 # Generate Plots
 ################################################################################
 
-distance_types <- c(
+distance.types <- c(
     'levenshtein',
     'damerau_levenshtein',
     'jaro',
@@ -19,7 +19,7 @@ distance_types <- c(
     'zlib_ncd'
 )
 
-for (d in distance_types) {
+for (d in distance.types) {
     plot.df <- read.csv(paste0('./calc/pbmc_experiment/',d,'_umap_data.csv'))
     ggplot(plot.df, aes(x=edit_UMAP, y=orig_UMAP, color=celltype)) +
         geom_point() +

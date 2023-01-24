@@ -34,6 +34,8 @@ adata.obs = adata_labeled.obs
 adata.obsm = adata_labeled.obsm
 adata_dists = skmetrics.pairwise_distances(adata.obsm['X_pca'])
 adata_umap1d = reducer.fit_transform(adata_dists)
+np.savetxt('./calc/pbmc_experiment/raw_dist_mat.csv',
+    adata_dists, delimiter=',')
 
 # create cell2sentence object
 csdata = cs.transforms.csdata_from_adata(adata)
@@ -50,6 +52,7 @@ distance_types = [
 for d in distance_types:
     print('===== PROCESSING ({}) ====='.format(d))
     mat = csdata.create_distance_matrix(dist_type=d)
+    np.savetxt('./calc/pbmc_experiment/{}_dist_mat.csv'.format(d), mat, delimiter=',')
     tmp_umap1d = reducer.fit_transform(mat)
     plot_df = pd.DataFrame({
         'edit_UMAP'.format(d): np.ravel(tmp_umap1d),

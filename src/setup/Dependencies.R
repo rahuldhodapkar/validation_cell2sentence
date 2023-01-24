@@ -28,6 +28,7 @@ local({r <- getOption("repos")
 install.packages('word2vec')
 install.packages('cccd')
 install.packages('igraph')
+install.packages('ade4')
 
 ##############################################
 # INSTALL FROM BIOCONDUCTOR
