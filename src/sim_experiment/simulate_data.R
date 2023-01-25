@@ -39,14 +39,15 @@ upsert <- function(df, update) {
 }
 
 # Define data simulation function using splatter
-simulate <- function(de.facScale, nGenes=200, nCells=100) {
+simulate <- function(de.facScale, nGenes=200, nCells=100, seed=42) {
     sim.groups <- splatSimulate(
         nGenes=nGenes,
         batchCells=nCells,
         group.prob = c(0.5, 0.5),
         method = "groups",
         de.facScale = de.facScale,
-        lib.loc = 5,
+        lib.loc = 3,
+        seed=seed,
         verbose = FALSE)
     meta.df <- data.frame(
         Group=sim.groups$Group,
@@ -75,6 +76,26 @@ graph.clustering.methods <- list(
 'louvain'=function(x, dx) {
     knn.graph <- nng(dx=as.matrix(dx), k=15)
     clust.res <- cluster_louvain(as.undirected(knn.graph))
+    return(clust.res$membership)
+},
+'edge_betweenness'=function(x, dx) {
+    knn.graph <- nng(dx=as.matrix(dx), k=15)
+    clust.res <- cluster_edge_betweenness(as.undirected(knn.graph))
+    return(clust.res$membership)
+},
+'fastgreedy'=function(x, dx) {
+    knn.graph <- nng(dx=as.matrix(dx), k=15)
+    clust.res <- cluster_fast_greedy(as.undirected(knn.graph))
+    return(clust.res$membership)
+},
+'fluid_communities'=function(x, dx) {
+    knn.graph <- nng(dx=as.matrix(dx), k=15)
+    clust.res <- cluster_fluid_communities(as.undirected(knn.graph), 2)
+    return(clust.res$membership)
+},
+'cluster_label_prop'=function(x, dx) {
+    knn.graph <- nng(dx=as.matrix(dx), k=15)
+    clust.res <- cluster_label_prop(as.undirected(knn.graph))
     return(clust.res$membership)
 })
 
@@ -113,41 +134,49 @@ calc.dx <- function(x, method) {
 }
 
 set.seed(42)
-sep.trials <- seq(from=0, to=2, by=0.1)
-plot.df <- NULL
-for (separation in sep.trials) {
-    sim.data <- simulate(separation)
-    ref.clusters <- sim.data[[2]]$Group
 
-    for (s in names(funcs)) {
-        x = sim.data[[1]]
-        dx = calc.dx(x, method=s)
+N.REPLICATES <- 15
+plot.df.agg <- NULL
+for (i in 1:N.REPLICATES) {
+    sep.trials <- seq(from=0, to=3, by=0.5)
+    plot.df <- NULL
+    for (separation in sep.trials) {
+        for (s in names(funcs)) {
+            for(clust.method in names(funcs[[s]])) {
+                # re-run simulation and distance calculation
+                sim.data <- simulate(separation, seed=floor(runif(1) * 1e7))
+                ref.clusters <- sim.data[[2]]$Group
+                x = sim.data[[1]]
+                dx = calc.dx(x, method=s)
 
-        for(clust.method in names(funcs[[s]])) {
-            ari <- NaN
-            tryCatch({
-                exp.clusters <- funcs[[s]][[clust.method]](x, dx)
+                # calculate ARI
+                ari <- NaN
+                tryCatch({
+                    exp.clusters <- funcs[[s]][[clust.method]](x, dx)
 
-                # evaluation metric (adjusted Rand index)
-                ari <- adj.rand.index(exp.clusters, ref.clusters)
-            }, error=function(e) {
-                message(paste0(separation,'|', s,'|', clust.method, ', failed'))
-                print(e)
-            }, warning=function(w) {
-                message(paste0(separation,'|', s,'|', clust.method, ', failed'))
-                print(w)
-            })
+                    # evaluation metric (adjusted Rand index)
+                    ari <- adj.rand.index(exp.clusters, ref.clusters)
+                }, error=function(e) {
+                    message(paste0(separation,'|', s,'|', clust.method, ', failed'))
+                    print(e)
+                }, warning=function(w) {
+                    message(paste0(separation,'|', s,'|', clust.method, ', failed'))
+                    print(w)
+                })
 
-            plot.df <- upsert(plot.df, data.frame(
-                'ARI'=ari,
-                'separation'=separation,
-                'distance_type'=s,
-                'clustering_type'=clust.method
-            ))
+                plot.df <- upsert(plot.df, data.frame(
+                    'ARI'=ari,
+                    'separation'=separation,
+                    'distance_type'=s,
+                    'clustering_type'=clust.method
+                ))
+            }
         }
     }
+    plot.df$replicate <- i
+    plot.df.agg <- upsert(plot.df.agg, plot.df)
 }
 
-write.csv(plot.df, './calc/sim_experiment/sim_results.csv', row.names=F)
+write.csv(plot.df.agg, './calc/sim_experiment/sim_results.csv', row.names=F)
 
 print('All done!')

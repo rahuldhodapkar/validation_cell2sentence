@@ -34,6 +34,7 @@ install.packages('igraph')
 install.packages('cccd')
 install.packages('pdfCluster')
 install.packages('stringr')
+install.packages('dplyr')
 
 ##############################################
 # INSTALL FROM BIOCONDUCTOR
