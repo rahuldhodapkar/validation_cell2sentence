@@ -135,10 +135,10 @@ calc.dx <- function(x, method) {
 
 set.seed(42)
 
-N.REPLICATES <- 15
+N.REPLICATES <- 30
 plot.df.agg <- NULL
 for (i in 1:N.REPLICATES) {
-    sep.trials <- seq(from=0, to=3, by=0.5)
+    sep.trials <- seq(from=0, to=5, by=0.5)
     plot.df <- NULL
     for (separation in sep.trials) {
         for (s in names(funcs)) {
